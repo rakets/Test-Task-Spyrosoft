@@ -12,5 +12,5 @@ import java.util.Map;
 public class DailyResponseDTO {
     private String date;
     private Map<String, Double> averageMix;
-    private double cleanEnergyPercent;
+    private Double cleanEnergyPercent;
 }
