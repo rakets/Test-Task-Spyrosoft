@@ -1,11 +1,10 @@
 package com.spyrosoft.test_task.controller;
 
 import com.spyrosoft.test_task.dto.DailyResponseDTO;
+import com.spyrosoft.test_task.dto.OptimalWindowResponseDTO;
 import com.spyrosoft.test_task.service.EnergyService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,6 +21,15 @@ public class EnergyController {
     @GetMapping("/mix")
     public ResponseEntity<List<DailyResponseDTO>> getEnergyMix() {
         List<DailyResponseDTO> response = energyService.getThreeDaysEnergyMix();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/optimal-window/{hours}")
+    public ResponseEntity<OptimalWindowResponseDTO> getOptimalWindow(@PathVariable("hours") int hours) {
+        if (hours < 1 || hours > 6) {
+            return ResponseEntity.badRequest().build();
+        }
+        OptimalWindowResponseDTO response = energyService.getOptimalChargingWindow(hours);
         return ResponseEntity.ok(response);
     }
 }
