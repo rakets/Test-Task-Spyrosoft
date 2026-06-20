@@ -32,7 +32,7 @@ public class EnergyService {
     // method for getting mix from 3 days energy data
     public List<DailyResponseDTO> getThreeDaysEnergyMix() {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
-        ZonedDateTime end = now.plusDays(3);
+        ZonedDateTime end = now.plusDays(2);
 
         List<IntervalDataDTO> dataList = fetchEnergyData(now, end);
 
@@ -88,10 +88,10 @@ public class EnergyService {
                 for (FuelDataDTO fuel : interval.getGenerationmix()) {
                     double percentageValue;
                     // situation if getPercent() return null (use 0.0)
-                    if (fuel.getPercent() == null) {
+                    if (fuel.getPerc() == null) {
                         percentageValue = 0.0;
                     } else {
-                        percentageValue = fuel.getPercent();
+                        percentageValue = fuel.getPerc();
                     }
                     // use variable 'percentageValue'
                     if (fuelSumMap.containsKey(fuel.getFuel())) {
@@ -100,7 +100,6 @@ public class EnergyService {
                     } else {
                         fuelSumMap.put(fuel.getFuel(), percentageValue);
                     }
-                    fuelSumMap.put(fuel.getFuel(), fuelSumMap.getOrDefault(fuel.getFuel(), 0.0) + percentageValue);
                 }
             }
         }

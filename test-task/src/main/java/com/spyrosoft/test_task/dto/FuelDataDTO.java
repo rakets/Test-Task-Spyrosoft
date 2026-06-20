@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FuelDataDTO {
     private String fuel;
-    private Double percent;
+    private Double perc;
 }
