@@ -158,7 +158,7 @@ public class EnergyService {
         // end interval
         IntervalDataDTO endInterval = data.get(bestStartIndex + intervalsNeeded - 1);
 
-        OptimalWindowResponseDTO window = new OptimalWindowResponseDTO(startInterval.getFromDate(), endInterval.getFromDate(), Math.round(maxCleanEnergyAvg * 100.0) / 100.0);
+        OptimalWindowResponseDTO window = new OptimalWindowResponseDTO(startInterval.getFromDate(), endInterval.getToDate(), Math.round(maxCleanEnergyAvg * 100.0) / 100.0);
         return window;
     }
 
