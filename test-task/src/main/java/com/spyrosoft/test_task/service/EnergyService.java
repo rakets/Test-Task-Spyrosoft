@@ -1,9 +1,6 @@
 package com.spyrosoft.test_task.service;
 
-import com.spyrosoft.test_task.dto.CarbonApiResponseDTO;
-import com.spyrosoft.test_task.dto.DailyResponseDTO;
-import com.spyrosoft.test_task.dto.FuelDataDTO;
-import com.spyrosoft.test_task.dto.IntervalDataDTO;
+import com.spyrosoft.test_task.dto.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -86,11 +83,9 @@ public class EnergyService {
         for (IntervalDataDTO interval : intervals) {
             if (interval.getGenerationmix() != null) {
                 for (FuelDataDTO fuel : interval.getGenerationmix()) {
-                    double percentageValue;
+                    double percentageValue = 0.0;
                     // situation if getPercent() return null (use 0.0)
-                    if (fuel.getPerc() == null) {
-                        percentageValue = 0.0;
-                    } else {
+                    if (fuel.getPerc() != null) {
                         percentageValue = fuel.getPerc();
                     }
                     // use variable 'percentageValue'
@@ -119,5 +114,70 @@ public class EnergyService {
         }
         DailyResponseDTO responseDTO = new DailyResponseDTO(date.toString(), averageMix,Math.round(cleanEnergyTotalAvg * 100.0) / 100.0);
         return responseDTO;
+    }
+
+    public OptimalWindowResponseDTO getOptimalChargingWindow (int hours) {
+        // take forecast from current + 48h
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+        ZonedDateTime end = now.plusDays(2);
+
+        List<IntervalDataDTO> data = fetchEnergyData(now, end);
+
+        // convert hours to 30min intervals Переводим часы в количество 30-минутных интервалов
+        int intervalsNeeded = hours * 2;
+
+        if (data == null || data.size() < intervalsNeeded) {
+            throw new IllegalStateException("There ara not enough data from API.");
+        }
+
+        double maxCleanEnergyAvg = -1.0;
+        int bestStartIndex = 0;
+
+        // window algorithm
+        for (int i = 0; i <= data.size() - intervalsNeeded; i++) {
+            double windowCleanEnergySum = 0;
+
+            // calculate clean energy into window
+            for (int j = 0; j < intervalsNeeded; j++) {
+                IntervalDataDTO interval = data.get(i + j);
+                windowCleanEnergySum += calculateCleanEnergyForInterval(interval);
+            }
+
+            // average value for window
+            double windowAvg = windowCleanEnergySum / intervalsNeeded;
+
+            // save avg value, index of window, if window better then
+            if (windowAvg > maxCleanEnergyAvg) {
+                maxCleanEnergyAvg = windowAvg;
+                bestStartIndex = i;
+            }
+        }
+
+        // start interval
+        IntervalDataDTO startInterval = data.get(bestStartIndex);
+        // end interval
+        IntervalDataDTO endInterval = data.get(bestStartIndex + intervalsNeeded - 1);
+
+        OptimalWindowResponseDTO window = new OptimalWindowResponseDTO(startInterval.getFromDate(), endInterval.getFromDate(), Math.round(maxCleanEnergyAvg * 100.0) / 100.0);
+        return window;
+    }
+
+    // method calculate sum % of clean energy in 30min interval
+    private double calculateCleanEnergyForInterval(IntervalDataDTO interval) {
+        if (interval.getGenerationmix() == null) {
+            return 0.0;
+        }
+
+        double cleanEnergySum = 0;
+        for (FuelDataDTO fuel : interval.getGenerationmix()) {
+            if (CLEAN_ENERGY.contains(fuel.getFuel())) {
+                double percValue = 0.0;
+                if (fuel.getPerc() != null) {
+                    percValue = fuel.getPerc();
+                }
+                cleanEnergySum += percValue;
+            }
+        }
+        return cleanEnergySum;
     }
 }
