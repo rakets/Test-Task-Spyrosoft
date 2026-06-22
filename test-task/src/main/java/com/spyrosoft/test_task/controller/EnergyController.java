@@ -10,7 +10,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/energy")
-@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class EnergyController {
 
     private final EnergyService energyService;
