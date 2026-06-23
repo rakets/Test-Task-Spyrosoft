@@ -9,8 +9,8 @@
 
 ---
 
-**Backend application to analyze the UK energy mix and determine the optimal time window for charging electric vehicles (EV).
-**Frontend Repository (React): https://github.com/rakets/Test-Task-Spyrosoft-Frontend
+* **Backend application to analyze the UK energy mix and determine the optimal time window for charging electric vehicles (EV).
+* **Frontend Repository (React): https://github.com/rakets/Test-Task-Spyrosoft-Frontend
 
 ---
 
